@@ -1,47 +1,14 @@
 import pygame
 import sys
-from random import shuffle, choice, randrange
+from random import shuffle,choice, randrange
 from functions.grab import grab
 from functions.soundsinit import init
 from functions.fonts import write
-from functions.menu import menu
 from glob import glob
 import os
 
-
-'''
-
-
-                PuzzleGame
-                ----------
-                v. 24.0 - fixed score, added methods to save
-                and load to Puzzle class. 16.8.20
-                v. 25.0
-                - better sounds
-                - improve scoring
-                2.7
-                save the actual situation
-                menu
-                choose the image you want
-                2.8
-                - finish menu
-                - new sounds: "joy", "yes", "ok", "nice", "right"
-                2.9
-                - lots of new sounds
-                3.0
-                - fix bug lost tiles
-                - memorize where you are
-                - new loops
-                3.1
-                shrink the middle table with puzzles
-
-
-
-
-
-
-'''
-print(sys.version)
+global imageSelected
+imageSelected = sys.argv[1]
 
 def harmonic_color(image):
     "Returns a random color from image"
@@ -55,10 +22,8 @@ def floor(num_to_round):
     str_num = str(num_to_round)
     lenstr = len(str_num)
     str_num = ["1"]
-    print(str_num)
     for n in range(1, lenstr):
         str_num.append("0")
-        print(str_num)
     str_num = "".join(str_num)
     str_num = int(str_num)
     flr = num_to_round // str_num * str_num
@@ -66,92 +31,36 @@ def floor(num_to_round):
 
 
 class Puzzle:
-    tiles_fixed = 0
-    score = 0
-    sounds, winsounds = init("sounds")
-    image = pygame.image.load(choice(glob("puzzles//*.png")))
-    w, h = image.get_size()
-    w = floor(w)
-    h = floor(h)
-    screen = pygame.display.set_mode((w * 3 - w // 2 + 14, h))
-    pygame.display.set_caption("Puzzle-mania 3.1")
-    image.convert()
-    bar = pygame.Surface((7, h))
-    bar.fill(harmonic_color(image))
-    clock = pygame.time.Clock()
-    font = pygame.font.SysFont("Arial", 24)
-    font2 = pygame.font.SysFont("Arial", 20)
-    # pygame.event.set_grab(True)
-    maxscore = 0
-    ### colors
-    BLACKTILE = (harmonic_color(image))
+	global imageSelected
 
-    def __init__(self, file):
-        self.file = file
-        self.load_maxscore()
+	tiles_fixed = 0
+	sounds, winsounds = init("sounds")
+	image = pygame.image.load(imageSelected)
+	w, h = image.get_size()
+	w = floor(w)
+	h = floor(h)
+	screen = pygame.display.set_mode((w * 3 - w // 2 + 14, h))
+	pygame.display.set_caption("Puzzle-mania 3.1")
+	image.convert()
+	bar = pygame.Surface((7, h))
+	bar.fill(harmonic_color(image))
+	clock = pygame.time.Clock()
+	font = pygame.font.SysFont("Arial", 24)
+	font2 = pygame.font.SysFont("Arial", 20)
+	### colors
+	BLACKTILE = (harmonic_color(image))
 
-    def file_is_empty(self):
-        "If a file is empty True"
-        with open(self.file, "r") as file_check:
-            f = file_check.read()
-        if f == "":
-            return True
-        else:
-            return False
-
-    def savescore(self):
-        if int(Puzzle.score) > int(Puzzle.maxscore):
-            self.write_maxscore(str(int(Puzzle.score)))
-
-    def write_maxscore(self, score):
-        "Write in the score.txt file"
-        with open(self.file, "w") as file:
-            file.write(str(score))
-            Puzzle.maxscore = score
-
-    def read_maxscore(self):
-        with open(self.file, "r") as file_saved:
-            last_maxscore = int(file_saved.read())
-            print("Maxscore = " + str(last_maxscore))
-            return last_maxscore
-
-    def file_exists(self):
-        "Check if file exists"
-        if self.file in os.listdir():
-            return True
-        else:
-            return False
-
-    def first_score(self):
-        "Create a new file for the score"
-        self.write_maxscore("10")
-
-    def load_maxscore(self):
-        ''' check if a file exists
-                if exists
-                    if is empty: it writes 10 in it
-                    else it reads the score as an integer
-                else: create and write 10
-        '''
-        if self.file_exists():
-            if not self.file_is_empty():
-                # This reads the score and put in Puuzzle.maxscore
-                Puzzle.maxscore = int(self.read_maxscore())
-            else:
-                self.first_score()
-        else:
-            self.first_score()
+	def __init__(self):
+		pass
 
 
 
 
 
 def start_again():
-    '''This is called when you hit space, it resets the value to fit the new
-    The separator will always be in color with the image'''
-    global blacktile
+    global blacktile,imageSelected
 
-    Puzzle.image = pygame.image.load(choice(glob("puzzles\\*.png")))
+    Puzzle.image = pygame.image.load(imageSelected)
     Puzzle.w, Puzzle.h = Puzzle.image.get_size()
     Puzzle.w = floor(Puzzle.w)
     Puzzle.h = floor(Puzzle.h)
@@ -171,51 +80,43 @@ class Tile:
 
 
 def check_if_ok(tile3, tile1, numtile):
-    global rects3, puzzle3, puzzle
+	global rects3, puzzle3, puzzle,imageSelected
 
     
 
-    # Check if the images are the same (same color)
-    uguale = 0
-    for pxh in range(Tile.h):
-        for pxw in range(Tile.w):
-            if tile3.get_at((pxw, pxh)) ==  tile1.get_at((pxw, pxh)):
-                uguale += 1
-            else:
-                # if there is one pixel that is different it quits
-                # they are not equal, so break - avoid time consuming
-                break
-    pixels = Tile.h * Tile.w
+	# Check if the images are the same (same color)
+	uguale = 0
+	for pxh in range(Tile.h):
+		for pxw in range(Tile.w):
+			if tile3.get_at((pxw, pxh)) ==  tile1.get_at((pxw, pxh)):
+				uguale += 1
+			else:
+				# if there is one pixel that is different it quits
+				# they are not equal, so break - avoid time consuming
+				break
+	pixels = Tile.h * Tile.w
 
     ###########################################################################
     #                          YOU PUT IT IN THE RIGHT SPOT                   #
     ###########################################################################
 
-    if pixels == uguale:
-        pygame.mixer.pause()
-        pygame.mixer.Sound.play(choice(Puzzle.winsounds))
-        
+	if pixels == uguale:
+		print("you got right")
+		pygame.mixer.music.pause()
+		pygame.mixer.Sound.play(choice(Puzzle.winsounds))
+		brighten = 32
+		tile3.fill((brighten, brighten, brighten), special_flags=pygame.BLEND_RGB_ADD) 
+		puzzle3[numtile][1] = tile3
+		puzzle[numtile][1] = tile3
+		# Another tile fixed correctly
+		Puzzle.tiles_fixed += 1
 
-        Puzzle.score += 25
-        brighten = 32
-        tile3.fill((brighten, brighten, brighten), special_flags=pygame.BLEND_RGB_ADD) 
-        puzzle3[numtile][1] = tile3
-        puzzle[numtile][1] = tile3
-        # Another tile fixed correctly
-        Puzzle.tiles_fixed += 1
-    else:
-        Puzzle.score -= 1
-
-    # Check if the puzzle is finished
-    if Puzzle.tiles_fixed == (Puzzle.w // Tile.w) * (Puzzle.h // Tile.h) - 1:
-        Puzzle.image = pygame.image.load(choice(glob("puzzles/*.png")))
-        create_puzzle()
-        show_puzzle()
-
+	# Check if the puzzle is finished
+	if Puzzle.tiles_fixed == (Puzzle.w // Tile.w) * (Puzzle.h // Tile.h) - 1:
+		print("you win!!!!")
 
 
 def blit(part, x, y):
-    "Show something on the window"
     Puzzle.screen.blit(part, (x, y))
 
 
@@ -230,11 +131,7 @@ def get_coords(event):
     mx = ((mousex - 7 - Puzzle.w // 2) // Tile.w ) * Tile.w
     my = (mousey // Tile.h) * Tile.h
     for coord in coords:
-        # if the mouse touches a tile that has the same coordinates
         if coord[1] == mx and coord[2] == my:
-            # show the number of the tile
-            # print(coord[0])
-            # print(puzzle[coord[0]])
             return coord
 
 def get_coords2(event):
@@ -245,14 +142,11 @@ def get_coords2(event):
     # transform coordinates into 
     mx = ((mousex - 14 - Puzzle.w - Puzzle.w // 2) // Tile.w) * Tile.w
     my = (mousey // Tile.h) * Tile.h
-    print(mx, my)
     # In coord we have all the coordinates of the first correct puzzle
     for coord in coords:
         # if the mouse touches a tile that has the same coordinates
         if coord[1] == mx and coord[2] == my:
             # show the number of the tile
-            # print(coord[0])
-            # print(puzzle[coord[0]])
             return coord
 
 
@@ -270,24 +164,7 @@ class Event_listener():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pyzzlemania.savescore()
                 self.quit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    pyzzlemannia.savescore()
-                    self.quit()
-                if event.key == pygame.K_SPACE:
-                    # show_puzzle(shuffled=1)
-                    myimage = choice(glob("puzzles/*.png"))
-                    Puzzle.image = pygame.image.load(myimage)
-                    start_again()
-                    create_puzzle()
-                    show_puzzle()
-                if event.key == pygame.K_s:
-                    pygame.mixer.music.unload()
-                if event.key == pygame.K_m:
-                    pygame.mixer.music.unload()
-                    music()
             if event.type == pygame.MOUSEBUTTONDOWN:
 
                 
@@ -315,14 +192,7 @@ class Event_listener():
                             Event_listener.p2pos = coord[0]
                             show_puzzle2()
                             Event_listener.pos3 = False
-                            # print(coord)
-                            # blit(blacktile, coord[1] + Puzzle.w, coord[2])
-                            # blit(puzzle2[coord[0]][1], event.pos[0], event.pos[1])
-                            # print(coord[0])
-                    
-                    #                                        #
-                    #            Clicco nel 3o quadrante     #
-                    #                                        #
+
                     elif x > Puzzle.w * 2 - Puzzle.w // 2 + 7: # and x < Puzzle.w * 3 - Puzzle.w // 2:
                         # coord2 = [num, x, y]
                         coord2 = get_coords2(event.pos)
@@ -334,9 +204,7 @@ class Event_listener():
                             Event_listener.p3pos = coord2[0] 
     
                             tile_in_3o = puzzle3[coord2[0]][1]
-                            # Memorizza il tile appena cliccato
                             Event_listener.tile = tile_in_3o
-                            # mette un tile bianco al posto del tile preso nello schermo 2
                             puzzle3[coord2[0]][1] = blacktile
                            
                             coord2 = get_coords2(event.pos)
@@ -350,7 +218,6 @@ class Event_listener():
             elif event.type == pygame.MOUSEBUTTONUP:
                 if Event_listener.drag:
                     play("click")
-                    Puzzle.score -= 1
 
                     if event.pos[0] > Puzzle.w // 2 + Puzzle.w + 14:
                         Event_listener.drag = 0
@@ -371,10 +238,8 @@ class Event_listener():
                         else:
                             self.back_in_place()
 
-# ho indentato questo else per fixare il bug del tile scomparso
+
                     else:
-                        # Rimette il pezzo preso nel primo spazio vuoto
-                        # del puzzle 2
                         self.back_in_place()
 
     def back_in_place(self):
@@ -407,20 +272,12 @@ def create_puzzle():
             # grab returns a Surface object
             tile = grab(Puzzle.screen, n * Tile.w, m * Tile.h, Tile.w, Tile.h)
             puzzle.append([order, tile])
-            #if randrange(0, 2):
-            #    if randrange(0, 2):
-            #        tile = pygame.transform.flip(tile, 1, 0)
-            #    else:
-            #        tile = pygame.transform.flip(tile, 0, 1)
-            #tile = pygame.transform.flip(tile, 1, 0)
             puzzle2.append([order, tile])
             puzzle3.append([order, blacktile])
             # The coordinates of the tiles
             coords.append([order, n * Tile.w, m * Tile.h])
             order += 1
-    # for n, x, y in coords:
-    #     puzzle[2] = (x, y)
-    shuffle(puzzle2)
+    #shuffle(puzzle2)
     origcoords = coords[:]
 
 
@@ -437,7 +294,6 @@ def show_puzzle():
         screen1.blit(pygame.transform.scale(puzzle[n][1], (Tile.w // 2, Tile.h // 2)), (x // 2, y // 2))
         rects.append(pygame.Rect(x + Puzzle.w, y, Tile.w // 2, Tile.h // 2))
         n += 1
-    # Puzzle.screen.blit(pygame.transform.scale(screen1, (Puzzle.w // 4, Puzzle.h // 4)), (0, 0))
     Puzzle.screen.blit(screen1, (0, 0))
 
 
@@ -464,7 +320,6 @@ def show_puzzle3():
     
     for num_tile, x, y in coords:
         blit(puzzle3[n][1], x + Puzzle.w * 2 - Puzzle.w // 2 + 14, y)
-        # rects3.append(pygame.Rect(x + Puzzle.w * 2 - Puzzle.w // 2 + 14, y, Tile.w, Tile.h))
         n += 1
     draw_grid2()
 
@@ -526,18 +381,6 @@ def bars():
     Puzzle.screen.blit(Puzzle.bar, (Puzzle.w // 2 + Puzzle.w + 7, 0))
 
 
-def font1(text, height):
-    write2(text, Puzzle.screen, Puzzle.font, 100, height)
-
-
-def write2(text, screen, font, x, y, color="Coral",):
-    text = font.render(text, 1, pygame.Color(color))
-    text_rect = text.get_rect(center=(Puzzle.w // 4, y))
-    screen.blit(text, text_rect)
-    return text
-
-def writing(text, width, height):
-    write2(text, Puzzle.screen, Puzzle.font, width, height)
 
 def soundinit():
     pygame.mixer.pre_init(44100, -16, 2, 512)
@@ -548,7 +391,7 @@ def soundinit():
 
 drag = 0
 
-pyzzlemania = Puzzle("score.txt")
+pyzzlemania = Puzzle()
 
 def music():
     pygame.mixer.music.load(choice([
@@ -564,22 +407,15 @@ def start():
     global puzzle, coords, drag
     # creates puzzle grabbing pieces from this image
     create_puzzle()
-    # soundinit()
-    # show_puzzle2()
-    # music()
     
     while True:
         Puzzle.screen.fill((0,0,0))
-        #Puzzle.screen.blit(Puzzle.screen2, (0, 500))
         show_puzzle()
         show_puzzle2()
         show_puzzle3()
         bars()
-        #writing(f"Score {int(Puzzle.score)}", 10, Puzzle.h // 2 + 30)
-        #writing(f"Pieces fixed = {int(Puzzle.tiles_fixed)}/{Puzzle.w // Tile.w * Puzzle.h // Tile.h}", 10, Puzzle.h // 2 + 60)
-        #font1(f"Maxiscore {Puzzle.maxscore}", Puzzle.h - 30)
+        
         if Event_listener.drag == 1:
-            Puzzle.score -= .01
             Puzzle.screen.blit(Event_listener.tile, (pygame.mouse.get_pos()[0] - Tile.w // 2, pygame.mouse.get_pos()[1] - Tile.h // 2))
         # User input
         Event_listener().check()
@@ -587,5 +423,4 @@ def start():
         Puzzle.clock.tick(60)
         
 
-menu(Puzzle, start)
 start()
