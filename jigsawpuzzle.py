@@ -328,18 +328,21 @@ def mainStart(imageUrl):
 	start()
 
 def start():
-    "The game begins here"
-    # creates puzzle grabbing pieces from this image
-    create_puzzle()
-    while True:
-        Puzzle.screen.fill((0,0,0))
-        show_puzzleOne()
-        show_puzzleTwo()
-        show_puzzleThree()
-        bars()      
-        if Event_listener.drag == 1:
-            Puzzle.screen.blit(Event_listener.tile, (pygame.mouse.get_pos()[0] - Tile.width // 2, pygame.mouse.get_pos()[1] - Tile.height // 2))
+	"The game begins here"
+	# creates puzzle grabbing pieces from this image
+	create_puzzle()
+	while True:
+		Puzzle.screen.fill((0,0,0))
+		show_puzzleOne()
+		show_puzzleTwo()
+		show_puzzleThree()
+		bars()      
+		try:
+			if Event_listener.drag == 1:
+				Puzzle.screen.blit(Event_listener.tile, (pygame.mouse.get_pos()[0] - Tile.width // 2, pygame.mouse.get_pos()[1] - Tile.height // 2))
+		except:
+			pass
         # User input
-        Event_listener().check()
-        pygame.display.update()
-        Puzzle.clock.tick(60)
+		Event_listener().check()
+		pygame.display.update()
+		Puzzle.clock.tick(60)
