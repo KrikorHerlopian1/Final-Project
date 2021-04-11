@@ -68,7 +68,6 @@ class Tile:
 
 def check_if_ok(tile3, tile1, numtile):
 	global rects3, puzzle3, puzzle,imageSelected
-
 	# Check if the images are the same (same color)
 	uguale = 0
 	for pxh in range(Tile.height):
@@ -80,11 +79,9 @@ def check_if_ok(tile3, tile1, numtile):
 				# they are not equal, so break - avoid time consuming
 				break
 	pixels = Tile.height * Tile.width
-
     ###########################################################################
     #                          YOU PUT IT IN THE RIGHT SPOT                   #
     ###########################################################################
-
 	if pixels == uguale:
 		print("you got right")
 		pygame.mixer.music.pause()
@@ -93,8 +90,7 @@ def check_if_ok(tile3, tile1, numtile):
 		tile3.fill((brighten, brighten, brighten), special_flags=pygame.BLEND_RGB_ADD) 
 		puzzle3[numtile][1] = tile3
 		puzzle[numtile][1] = tile3
-		# Another tile fixed correctly
-		Puzzle.tiles_positioned_correct += 1
+		Puzzle.tiles_positioned_correct += 1 # Another tile fixed correctly , update counter.
 	# Check if the puzzle is finished
 	if Puzzle.tiles_positioned_correct == (Puzzle.width // Tile.width) * (Puzzle.height // Tile.height) - 1:
 		print("you win!!!!")
@@ -130,94 +126,98 @@ def get_coordinates2(event):
             return coord
 
 class Event_listener():
-    "How to exit from the game"
-    global coords, puzzle2, blacktile, puzzle3
-    drag = 0
-    p2pos = 0
-    # see in which cadre you picked the tile
-    pos3 = False
-    def check(self):
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.quit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    play("click")
+	"How to exit from the game"
+	global coords, puzzle2, blacktile, puzzle3
+	drag = 0
+	p2pos = 0
+	# see in which cadre you picked the tile
+	pos3 = False
+	scenario = 0
+	def check(self):
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				self.quit()
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				if event.button == 1:
+					play("click")
                     # Until you press you will see the image
                     # under the mouse arrow icon
-                    Event_listener.drag = 1
-                    x, y = event.pos
+					Event_listener.drag = 1
+					x, y = event.pos
                     # Avoid working out of the middle area
-                    if x > Puzzle.width // 2 + 7 and x < Puzzle.width * 2 - Puzzle.width // 2 + 7:
-                        coord = get_coordinates(event.pos)
-                        if puzzle2[coord[0]][1] == blacktile:
-                            Event_listener.drag = 0
-                        else:
+					if x > Puzzle.width // 2 + 7 and x < Puzzle.width * 2 - Puzzle.width // 2 + 7:
+						Event_listener.scenario = 1
+						coord = get_coordinates(event.pos)
+						if puzzle2[coord[0]][1] == blacktile:
+							Event_listener.drag = 0
+						else:
                             # check if the mouse is over a tile and
                             # get it into Event...tile
-                            puzzle_get = puzzle2[coord[0]][1]
-                            Event_listener.tile = puzzle_get
-                            puzzle2[coord[0]][1] = blacktile
+							puzzle_get = puzzle2[coord[0]][1]
+							Event_listener.tile = puzzle_get
+							puzzle2[coord[0]][1] = blacktile
                             # Memorize the position of the tile
-                            Event_listener.p2pos = coord[0]
-                            show_puzzleTwo()
-                            Event_listener.pos3 = False
-                    elif x > Puzzle.width * 2 - Puzzle.width // 2 + 7: 
-                        coord2 = get_coordinates2(event.pos)
+							Event_listener.p2pos = coord[0]
+							show_puzzleTwo()
+							Event_listener.pos3 = False
+					elif x > Puzzle.width * 2 - Puzzle.width // 2 + 7: 
+						Event_listener.scenario = 2
+						coord2 = get_coordinates2(event.pos)
                         # you picked the tile in the 3rd painting
-                        if puzzle[coord2[0]][1] == puzzle3[coord2[0]][1] or puzzle3[coord2[0]][1] == blacktile:
-                            Event_listener.drag = 0
-                        else:
-                            Event_listener.pos3 = True
-                            Event_listener.p3pos = coord2[0] 
+						if puzzle[coord2[0]][1] == puzzle3[coord2[0]][1] or puzzle3[coord2[0]][1] == blacktile:
+							Event_listener.drag = 0
+						else:
+							Event_listener.pos3 = True
+							Event_listener.p3pos = coord2[0] 
     
-                            tile_in_3o = puzzle3[coord2[0]][1]
-                            Event_listener.tile = tile_in_3o
-                            puzzle3[coord2[0]][1] = blacktile
+							tile_in_3o = puzzle3[coord2[0]][1]
+							Event_listener.tile = tile_in_3o
+							puzzle3[coord2[0]][1] = blacktile
                            
-                            coord2 = get_coordinates2(event.pos)
-                            if puzzle3[coord2[0]][1] == blacktile:
-                                puzzle_get = puzzle3[coord2[0]][1]
+							coord2 = get_coordinates2(event.pos)
+							if puzzle3[coord2[0]][1] == blacktile:
+								puzzle_get = puzzle3[coord2[0]][1]
                                 
             # when you mouse up on many tile the tile disappear
-            elif event.type == pygame.MOUSEBUTTONUP:
-                if Event_listener.drag:
-                    play("click")
-                    if event.pos[0] > Puzzle.width // 2 + Puzzle.width + 14:
-                        Event_listener.drag = 0
+			elif event.type == pygame.MOUSEBUTTONUP:
+				# just disable getting new titles from the first image. only drag from 2nd to 3rd part.
+				if Event_listener.scenario == 0:
+					continue
+				Event_listener.scenario = 0
+				if Event_listener.drag:
+					play("click")
+					if event.pos[0] > Puzzle.width // 2 + Puzzle.width + 14:
+						Event_listener.drag = 0
                         # See where you are leaving the piece
-                        coord2 = get_coordinates2(event.pos)
+						coord2 = get_coordinates2(event.pos)
                         # Number of the tile where you are putting the piece
-                        casella = puzzle3[coord2[0]]
-                        tile3 = casella[1]
-                        if tile3 == blacktile:
-                                Event_listener.drag = 0                              
-                                puzzle3[coord2[0]][1] = Event_listener.tile
-                                check_if_ok(Event_listener.tile, puzzle[coord2[0]][1], coord2[0])
-                        elif Event_listener.pos3:
-                            puzzle3[Event_listener.p3pos][1] = Event_listener.tile
-                        else:
-                            self.back_in_place()
-                    else:
-                        self.back_in_place()
+						casella = puzzle3[coord2[0]]
+						tile3 = casella[1]
+						if tile3 == blacktile:
+							Event_listener.drag = 0                              
+							puzzle3[coord2[0]][1] = Event_listener.tile
+							check_if_ok(Event_listener.tile, puzzle[coord2[0]][1], coord2[0])
+						elif Event_listener.pos3:
+							puzzle3[Event_listener.p3pos][1] = Event_listener.tile
+						else:
+							self.back_in_place()
+					else:
+						self.back_in_place()
 
-    def back_in_place(self):
-        for n, tile in enumerate(puzzle2):
-            if tile[1] == blacktile:
-                Event_listener.drag = 0
-                puzzle2[n][1] = Event_listener.tile
-                break
-
-    def quit(self):
-        "Quite pygame and the python interpreter"
-        pygame.quit()
-        sys.exit()
+	def back_in_place(self):
+		for n, tile in enumerate(puzzle2):
+			if tile[1] == blacktile:
+				Event_listener.drag = 0
+				puzzle2[n][1] = Event_listener.tile
+				break
+	def quit(self):
+		"Quite pygame and the python interpreter"
+		pygame.quit()
+		sys.exit()
 
 def create_puzzle():
     "Take the image and makes a puzzle, returns list of pieces and coordinates"
-    global puzzle, puzzle2, puzzle3,blacktile
-    global coords, origcoords
+    global puzzle, puzzle2, puzzle3,blacktile,coords, origcoords
     puzzle = []
     puzzle2 = [] # this will be shuffled
     puzzle3 = []
@@ -342,7 +342,7 @@ def start():
 				Puzzle.screen.blit(Event_listener.tile, (pygame.mouse.get_pos()[0] - Tile.width // 2, pygame.mouse.get_pos()[1] - Tile.height // 2))
 		except:
 			pass
-        # User input
+		# User input
 		Event_listener().check()
 		pygame.display.update()
 		Puzzle.clock.tick(60)
